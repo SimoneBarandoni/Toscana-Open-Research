@@ -88,7 +88,7 @@ t3 <- trend_2 %>%
   rename(interest = LIFE_LEARNING) %>% 
   mutate(search_term = "Life Learning")
 
-trend_2 <- bind_rows(t1,t2,t3,t4,t5)
+trend_2 <- bind_rows(t1,t2,t3)
 
 # line plot
 
