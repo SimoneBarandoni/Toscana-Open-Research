@@ -4,14 +4,13 @@ library(tidyverse)
 
 esco_original <- read_xlsx("Input/esco_it_skills.xlsx")
 
-soft_skill <- read_xlsx("Input/soft_skills_indeed_add_on.xlsx")
-
-
-# ADDING SOFT SKILLS ------------------------------------------------------
-
-esco_original <- rbind(esco_original, soft_skill)
+isco <- read_xlsx("Input/isco.xlsx")
+ 
 
 # SUBSETTING ESCO DATASET -------------------------------------------------
+
+isco <- isco %>% 
+  filter(elim != "1")
 
 pattern_tic <- or(SPC %R% "TIC" %R% SPC, SPC %R% "TIC" %R% END)
 
