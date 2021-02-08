@@ -110,6 +110,8 @@ df_1 <- df_1 %>%
   mutate(descr = str_replace_all(descr, SPC %R% one_or_more(SPC), " ")) %>% 
   mutate(descr = str_remove_all(descr, or(START %R% SPC, SPC %R% END)))
 
+write_rds(df_1, "Intermediate/df_clean_not_lemmatized.rds")
+
 # SENTENCES LEMMATIZATION AND CLEANING -------------------------------------
 
 df_1_1 <- df_1
