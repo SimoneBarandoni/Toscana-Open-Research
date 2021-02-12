@@ -188,8 +188,8 @@ for (i in 1: df_3_1Length)
     slice(1:10) %>%
     mutate(fraseOrig = frase) %>% # adding a column with the analyzed sentencen without text cleaning op
     select(description, fraseOrig, x, doc_id) %>% 
-    left_join(esco, by = c("doc_id" = "doc_id_esco")) %>% 
-    select(x, doc_id, fraseOrig, skill_original)
+    left_join(esco %>% select(-description), by = c("doc_id" = "doc_id_esco")) %>% 
+    select(fraseOrig, skill_original, x, doc_id, description)
   
   # now we have a daset with the first 30 esco skill for the given 
   
