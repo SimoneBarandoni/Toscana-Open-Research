@@ -4,7 +4,7 @@ library(tidyverse)
 library(tidytext)
 library(tm)
 
-df_1 <- readRDS("Intermediate/df_1.rds")
+df_1 <- readRDS("Intermediate/df_clean_not_lemmatized.rds")
 
 aggettivi <- read_xlsx("Input/aggettivi.xlsx")
 
@@ -289,7 +289,8 @@ for (frase in 1:nrow(df_1))
 
 
 df_1 <- df_1 %>% 
-  select(-original_txt)
+  select(-original_txt) %>% 
+  filter(skill != "")
 
 end_time <- Sys.time()
 
