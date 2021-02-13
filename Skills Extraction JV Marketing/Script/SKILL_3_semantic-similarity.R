@@ -14,7 +14,8 @@ df_1 <- readRDS("Intermediate/df_1.rds")
 
 it_model <- udpipe::udpipe_load_model("Input/italian-isdt-ud-2.4-190531.udpipe")
 
-esco_original_1_multiple_word <- readRDS("Intermediate/esco_original_1_multiple_word.rds")
+esco_original_1_multiple_word <- readRDS("Intermediate/esco_original_1_multiple_word.rds") %>% 
+  sample_n(1000)
 
 aggettivi <- read_xlsx("Input/aggettivi.xlsx")
 
@@ -81,7 +82,7 @@ esco <- esco_original_1_multiple_word %>%
   filter(tag != 1) %>%
   select(-tag) %>%
   mutate(description = str_replace_all(description, one_or_more(SPC), " ")) %>%
-  mutate(doc_id_esco = 10000 + doc_id_esco) %>%
+  mutate(doc_id_esco = 100000 + doc_id_esco) %>%
   distinct(doc_id_esco, .keep_all = T)
 
 esco1 <- esco %>%
@@ -144,15 +145,15 @@ df_clean_2 <- df_clean_2 %>%
 df_clean_2 <- df_clean_2 %>%
   mutate(description = str_remove_all(description, whole_word("sarare venire"))) %>%
   mutate(description = str_remove_all(description, or(START %R% SPC, SPC %R% END))) %>%
-  select(description, doc_id)
+  select(description, id_sentence)
 
 
 df_clean_2 <- df_clean_2 %>%
   unnest_tokens(word, description) %>%
-  group_by(doc_id) %>%
-  distinct(word, doc_id, .keep_all = T) %>% #eliminating duplicates of a word in a phrase to improve tf idf measure
+  group_by(id_sentence) %>%
+  distinct(word, id_sentence, .keep_all = T) %>% #eliminating duplicates of a word in a phrase to improve tf idf measure
   ungroup() %>%
-  group_by(doc_id) %>%
+  group_by(id_sentence) %>%
   summarise(description = paste(word, collapse = " ")) %>%
   ungroup()
 
@@ -161,7 +162,7 @@ df_clean_2 <- df_clean_2 %>%
 
 
 # joined_data is the rowbind between jv and esco datasets
-joined_data <- rbind(df_clean_2, POS %>% rename(doc_id = doc_id_esco))
+joined_data <- rbind(df_clean_2, POS %>% rename(id_sentence = doc_id_esco))
 
 
 joined_data$description <- prep_fun(joined_data$description)
@@ -184,21 +185,21 @@ word_count <- joined_data_tf_idf %>%
   count(word)
 
 joined_data_tf_idf <- joined_data_tf_idf %>%
-  group_by(doc_id) %>%
+  group_by(id_sentence) %>%
   count(word) %>%
-  bind_tf_idf(word, doc_id, n)
+  bind_tf_idf(word, id_sentence, n)
 
 # tf idf list for esco skills word
 
 esco_word_tf_idf <- joined_data_tf_idf %>%
-  filter(doc_id >= 10000) %>%
+  filter(id_sentence >= 100000) %>%
   distinct(word, .keep_all = T) %>%
   arrange(-idf) %>%
   ungroup()
 
 # tf idf list for phrases word
 phrases_word_tf_idf <- joined_data_tf_idf %>%
-  filter(doc_id < 10000) %>%
+  filter(id_sentence < 100000) %>%
   distinct(word, .keep_all = T) %>%
   arrange(-idf) %>%
   ungroup()
@@ -286,7 +287,7 @@ POS_1 <- POS_1 %>%
 
 
 # joined_data is the rowbind between jv and esco datasets
-joined_data <- rbind(df_clean_3, POS_1 %>% rename(doc_id = doc_id_esco))
+joined_data <- rbind(df_clean_3, POS_1 %>% rename(id_sentence = doc_id_esco))
 
 
 joined_data$description <- prep_fun(joined_data$description)
@@ -297,15 +298,15 @@ joined_data <- joined_data %>%
   mutate(description = str_remove_all(description, pat_agg)) %>%
   mutate(description = str_replace_all(description, one_or_more(SPC), " "))
 
-df_clean_3 <- left_join(df_clean_3,df_1 %>% select(-id), by = c("doc_id" = "id_sentence"))
+df_clean_3 <- left_join(df_clean_3,df_1 %>% select(-id), by = c("id_sentence" = "id_sentence"))
 
 # SIMILARITY MEASUREMENT --------------------------------------------------------
 
 # magnitude order for esami sentences id is under 10k
 
-df_1Length <- nrow(joined_data %>% filter(doc_id < 10000))
+df_1Length <- nrow(joined_data %>% filter(id_sentence < 100000))
 
-escoLength <- nrow(joined_data %>% filter(doc_id > 10000))
+escoLength <- nrow(joined_data %>% filter(id_sentence > 100000))
 
 # cosine similarity operations
 
@@ -326,7 +327,7 @@ tfidf = TfIdf$new()
 dtm_tfidf = fit_transform(dtm, tfidf)
 
 
-similarities <- data.frame(x = NA, description = NA, score_BERT = NA, doc_id = NA, stringsAsFactors = FALSE)
+similarities <- data.frame(x = NA, description = NA, score_BERT = NA, id_sentence = NA, stringsAsFactors = FALSE)
 
 # for each jv sentence
 for (i in 1: df_1Length)
@@ -346,16 +347,18 @@ for (i in 1: df_1Length)
     arrange(-x) %>%
     slice(1:30) %>%
     mutate(fraseOrig = frase) %>%
-    select(description, fraseOrig, x, doc_id)
-  
+    select(description, fraseOrig, x, id_sentence) %>% 
+    left_join(esco %>% select(-description), by = c("id_sentence" = "doc_id_esco")) %>% 
+    select(fraseOrig, skill_original, x, id_sentence, description)
+
   df <- semantic_similarity(df,
                             method = c("BERT"),
                             lang = "ITA")
-  
+
   df <- df %>%
     arrange(-score_BERT ) %>%
     slice(1) %>%
-    select(x,score_BERT, description, doc_id )
+    select(x,score_BERT, description, id_sentence )
   
   
   
@@ -369,7 +372,7 @@ for (i in 1: df_1Length)
 
 similarities <- similarities %>%
   slice(-1) %>%
-  rename(label_esco = description, doc_id_esco = doc_id) %>%
+  rename(label_esco = description, doc_id_esco = id_sentence) %>%
   rename(cosine_similarity = score_BERT) %>%
   select(-x)
 
@@ -384,15 +387,14 @@ similarities_1 <- similarities %>%
             , by = c("doc_id_esco"))
 
 df_clean_3 <- similarities_1 %>%
-  select(doc_id, description, doc_id_esco, skill) %>%
+  select(id_sentence, description, doc_id_esco, skill) %>%
   rename(word = description)
 
-df_clean_3 <- left_join(df_clean_3,df_clean, by = c("doc_id"="doc_id"))
+df_clean_3 <- left_join(df_clean_3,df_clean, by = c("id_sentence"="id_sentence"))
 
 df_clean_3 <- df_clean_3 %>%
   select(-word) %>%
-  rename(word = testoLemm) %>% 
-  rename(id_sentence=doc_id)
+  rename(word = testoLemm)
 
 # OUTPUT GENERATION -------------------------------------------------------
 

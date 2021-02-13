@@ -108,9 +108,10 @@ df_1 <- df_1 %>%
   arrange(id_sentence) %>% 
   ungroup() %>% 
   mutate(descr = str_replace_all(descr, SPC %R% one_or_more(SPC), " ")) %>% 
-  mutate(descr = str_remove_all(descr, or(START %R% SPC, SPC %R% END)))
+  mutate(descr = str_remove_all(descr, or(START %R% SPC, SPC %R% END))) %>% 
+  select(-tag_remove)
 
-write_rds(df_1, "Intermediate/df_clean_not_lemmatized.rds")
+
 
 # SENTENCES LEMMATIZATION AND CLEANING -------------------------------------
 
@@ -188,9 +189,14 @@ id_df_1 <- df_1 %>%
   select(-descr)
  
 
-df_clean <- left_join(df_1_1, id_df_1, by = c("doc_id" = "id_sentence"))
+df_clean <- left_join(df_1_1, id_df_1, by = c("doc_id" = "id_sentence")) %>% 
+  rename(id_sentence = doc_id) %>% 
+  filter(testoLemm != "")
 
 # OUTPUT GENERATION -------------------------------------------------------
 
+# generate the dataset with the raw cleaning only, to be used by the keywords' sequential search
+write_rds(df_1, "Intermediate/df_clean_not_lemmatized.rds")
 
+# generate the cleaned and lemmatized dataset, to be used by the semantic similarity
 write_rds(df_clean, "Intermediate/df_clean.rds")
