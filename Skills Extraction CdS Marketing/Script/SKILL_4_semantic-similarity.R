@@ -24,7 +24,6 @@ italian_dictionary <- read.csv2("Input/dizionario-totale.csv")
 lemma_correction <- read_xlsx("Input/wrong_lemmatized_ESCO.xlsx")
 
 
-#esco_original_1_multiple_word <- esco_original_1_multiple_word %>% sample_n(30)
 
 # BLACKLIST AND LEMMA CORRECTION PREPARATION ------------------------------
 
@@ -68,6 +67,7 @@ pat_agg <- or1(aggettivi$agg)
 esco <- esco_original_1_multiple_word %>%
   select(preferredLabel, doc_id_esco) %>%
   rename(description = preferredLabel) %>%
+  mutate(skill_original = description) %>%
   mutate(skill = description) %>% # we have to mantain an original skill label version 
   mutate(description = str_remove_all(description, pat_agg)) %>%
   mutate(tag = if_else(str_detect(description, whole_word("TIC")), 1, 0)) %>%
@@ -185,7 +185,9 @@ for (i in 1: df_3_1Length)
     arrange(-x) %>%
     slice(1:10) %>%
     mutate(fraseOrig = frase) %>% # adding a column with the analyzed sentencen without text cleaning op
-    select(description, fraseOrig, x, doc_id)
+    select(description, fraseOrig, x, doc_id) %>% 
+    left_join(esco %>% select(-description), by = c("doc_id" = "doc_id_esco")) %>% 
+    select(fraseOrig, skill_original, x, doc_id, description)
   
   # now we have a daset with the first 30 esco skill for the given 
   

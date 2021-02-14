@@ -4,6 +4,21 @@ library(tidytext)
 
 original_df <- readRDS("Input/cds_marketing_original.rds")
 
+# identifiers
+
+cds <- original_df %>% 
+  distinct(corso_di_studio) %>% 
+  mutate(id_cds = row_number())
+
+esam <- original_df %>% 
+  distinct(corso_di_studio,esame) %>% 
+  mutate(id_esame = row_number())
+
+original_df <- left_join(original_df, cds)
+
+original_df <- left_join(original_df, esam)
+
+
 # the obiettivi formativi of each cds are been cleaned manually so there is no need to clean that column
 
 # FIXING TEXT -----------------------------------------------------
@@ -102,11 +117,13 @@ df_2 <- df_2 %>%
   filter(!(str_length(obiettivi_formativi_clean) < 30 & str_detect(obiettivi_formativi_clean, "\\:"))) %>% 
   filter(str_detect(obiettivi_formativi_clean, ALPHA))
 
-# assign an id to each sentence
+# assign an id to each sentence and set NA to the id_esame, since these sentences come
+# from a corso di studi, not from a precise exam
 
 df_2 <- df_2 %>% 
   arrange(id) %>% 
-  mutate(id_sentence = row_number()) 
+  mutate(id_sentence = row_number()) %>% 
+  mutate(id_esame = NA)
 
 # OUTPUT GENERATION -------------------------------------------------------
 

@@ -25,7 +25,7 @@ blacklist <- read_csv2("Input/blacklist1.csv")
 # and special characther cleaned version and the third is a lemmatized and cleaned bag of word version
 
 # temporarly sampling esami dataframe to speed up execution time
-df_3 <- df_3 %>% slice(1:100)
+#df_3 <- df_3 %>% slice(1:100)
 
 # INPUT DATASET PREPARATION -----------------------------------------------
 
