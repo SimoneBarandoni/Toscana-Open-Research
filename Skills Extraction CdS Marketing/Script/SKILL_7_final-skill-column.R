@@ -18,7 +18,7 @@ esco_single <- readRDS("Intermediate/esco_original_1_single_word.rds")
 
 esco_multiple <- readRDS("Intermediate/esco_original_1_multiple_word.rds")
 
-esco_original_1 <- readRDS("Intermediate/esco_original_0.rds")
+esco_original_1 <- readRDS("Intermediate/esco_original_1.rds")
 
 esco_en <- read_xlsx("Input/esco_en_skills.xlsx")
 
@@ -143,8 +143,7 @@ final_dataset <- df_original %>%
   left_join(esco_original_1 %>% mutate(doc_id_esco = as.character(doc_id_esco)), # nb esco orignal 1 have only the preferred label column as we want
             by = c("doc_id_esco" = "doc_id_esco")) %>%
   arrange(overall_id) %>% 
-  mutate(final_dataset_id = row_number()) %>% 
-  select(-altLabels, -relationType, - iscoGroup, -jobPreferredLabel, -skillType, -reuseLevel)
+  mutate(final_dataset_id = row_number())
 
 
 
