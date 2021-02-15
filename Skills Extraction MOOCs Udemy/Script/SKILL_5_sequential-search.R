@@ -15,7 +15,7 @@ start_time <- Sys.time()
 # temporary sampling datasets to reduce computational time
 #esco_original_1_multiple_word <- esco_original_1_multiple_word %>% sample_n(1000)
 
-df_3_1 <- df_3_1 %>% slice(1:200)
+#df_3_1 <- df_3_1 %>% slice(1:200)
 
 # FUNCTION PREP_FUN ---------------------------------------------------------------
 

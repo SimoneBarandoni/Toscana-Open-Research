@@ -14,7 +14,7 @@ isco_codes <- read_xlsx("Input/isco.xlsx")
 
 # temporarly reducing dataset rows 
 
-df_3_1 <- df_3_1 %>% slice(1:200)
+#df_3_1 <- df_3_1 %>% slice(1:200)
 
 # ENGLISH ESCO DATASET PREPARATION ----------------------------------------------------
 
