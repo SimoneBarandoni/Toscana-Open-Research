@@ -6,6 +6,7 @@ esco_original <- read_xlsx("Input/esco_it_skills.xlsx")
 
 keywords <- readRDS("Input/keyword_list.rds")
 
+ont <- readRDS("Input/ontology.rds") 
 
 # SUBSETTING ESCO DATASET -------------------------------------------------
 
@@ -101,9 +102,23 @@ esco_original_1_multiple_word <- esco_original_1_multiple_word %>%
   filter(n<7)
 
 
+# ONTOLOGY ----------------------------------------------------------------
+
+ont <- ont %>% 
+  select(-id, -other) 
+
+esco_original_1 <- left_join(esco_original_1, ont, by = c("preferredLabel" = "skill")) %>% 
+  select(-relationType, -skillType, -reuseLevel, -jobAlternativeLabel)
+
+esco_original_1_single_word <- left_join(esco_original_1_single_word, ont, by = c("preferredLabel" = "skill"))%>% 
+  select(-relationType, -skillType, -reuseLevel, -jobAlternativeLabel)
+
+esco_original_1_multiple_word <- left_join(esco_original_1_multiple_word, ont, by = c("preferredLabel" = "skill"))%>% 
+  select(-relationType, -skillType, -reuseLevel, -jobAlternativeLabel)
+
 # OUTPUT GENERATION -------------------------------------------------------
 
-write_rds(esco_original_0, "Intermediate/esco_original_0.rds")
+write_rds(esco_original_1, "Intermediate/esco_original_1.rds")
 
 write_rds(esco_original_1_single_word, "Intermediate/esco_original_1_single_word.rds")
 
