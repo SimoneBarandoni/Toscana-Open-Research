@@ -12,7 +12,7 @@ pat <- or1(whole_word(esco$preferredLabel))
 
 skills_dataset <- df_3_1 %>%
   rowwise() %>%
-  mutate(skills_list = paste(unlist(str_match_all(str_to_lower(merged_sentences), whole_word(str_to_lower(pat)))), collapse = " ; ")) %>% 
+  mutate(skills_list = paste(unlist(str_match_all(str_to_lower(sentences_lemm), whole_word(str_to_lower(pat)))), collapse = " ; ")) %>% 
   mutate(skills_list = if_else(skills_list == "c", "C#", skills_list)) %>% 
   mutate(skills_list = if_else(skills_list == "r", "R", skills_list)) %>% 
   ungroup()
