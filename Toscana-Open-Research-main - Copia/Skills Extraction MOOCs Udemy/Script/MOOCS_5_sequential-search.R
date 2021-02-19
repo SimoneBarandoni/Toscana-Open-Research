@@ -115,12 +115,10 @@ esco_original_1_multiple_word <- esco_original_1_multiple_word %>%
 esco_original_1_multiple_word$word <- prep_fun(esco_original_1_multiple_word$word)
 
 df_3_1 <- df_3_1 %>%
-  rename(word = merged_sentences) %>%
+  mutate(word = sentences_clean) %>%
   mutate( skills_list = "") %>% 
-  mutate( doc_id_esco = "")
-
-df_3_1 <- df_3_1 %>% 
-  mutate(sentences_clean = str_remove_all(sentences_clean, pat_agg))
+  mutate( doc_id_esco = "") %>% 
+  mutate(word = str_remove_all(word, pat_agg))
 
 
 # ARRANGING SKILLS DATASET ------------------------------------------------
@@ -288,7 +286,7 @@ for (frase in 1:nrow(df_3_1))
 remove(subset, aggettivi)
 
 skills_dataset <- df_3_1 %>% 
-  rename(merged_sentences = word)
+  select(-word)
 
 end_time <- Sys.time()
 
