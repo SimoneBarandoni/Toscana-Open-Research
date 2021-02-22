@@ -28,7 +28,7 @@ df1 <- df %>%
 
 #split text into sentences using punctuation
 
-pat <- or("\\?", "\\!", "\\:", "\\;", "\\-", "\\–")
+pat <- or("\\?", "\\!", "\\:", "\\;", "\\-", "\\–", "\\*")
 
 # because of separate rows function will delete the punctuation i ve to put in the text an anchor added
 # to punctuation in order to separate rows by the chosen anchor
